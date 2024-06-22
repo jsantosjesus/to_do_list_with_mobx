@@ -4,7 +4,10 @@ import 'package:to_do_list_with_mobx/src/modules/home/presenter/store/tarefas_st
 import 'package:get_it/get_it.dart';
 
 class AddTarefaDialog extends StatefulWidget {
-  const AddTarefaDialog({super.key});
+  final TarefasModel? tarefasModel;
+  final int? index;
+
+  const AddTarefaDialog({super.key, this.tarefasModel, this.index});
 
   @override
   State<AddTarefaDialog> createState() => _AddTarefaDialogState();
@@ -15,9 +18,25 @@ class _AddTarefaDialogState extends State<AddTarefaDialog> {
 
   final TarefasStore store = GetIt.I<TarefasStore>();
 
-  String titleController = '';
-  bool importantController = false;
-  bool urgentController = false;
+  late String titleController;
+  late bool importantController;
+  late bool urgentController;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.tarefasModel != null) {
+      titleController = widget.tarefasModel!.title;
+      importantController = widget.tarefasModel!.important;
+      urgentController = widget.tarefasModel!.urgent;
+    } else {
+      titleController = '';
+      importantController = false;
+      urgentController = false;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
@@ -26,8 +45,11 @@ class _AddTarefaDialogState extends State<AddTarefaDialog> {
         mainAxisSize: MainAxisSize.min,
         children: [
           TextField(
+            controller: TextEditingController(text: titleController),
             onChanged: (value) {
+              // setState(() {
               titleController = value;
+              // });
             },
             decoration: const InputDecoration(labelText: 'título'),
           ),
@@ -63,10 +85,22 @@ class _AddTarefaDialogState extends State<AddTarefaDialog> {
           children: [
             IconButton(
                 onPressed: () {
-                  store.addTarefa(TarefasModel(
-                      title: titleController,
-                      important: importantController,
-                      urgent: urgentController));
+                  if (titleController.isEmpty) {
+                  } else if (widget.tarefasModel == null) {
+                    store.addTarefa(TarefasModel(
+                        title: titleController,
+                        check: false,
+                        important: importantController,
+                        urgent: urgentController));
+                  } else {
+                    store.editTarefa(
+                        tarefasModel: TarefasModel(
+                            title: titleController,
+                            check: false,
+                            important: importantController,
+                            urgent: urgentController),
+                        index: widget.index!);
+                  }
                   Navigator.of(context).pop();
                 },
                 icon: const Icon(Icons.check)),

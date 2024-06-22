@@ -1,22 +1,38 @@
-import 'package:mobx/mobx.dart';
+// ignore_for_file: public_member_api_docs, sort_constructors_first
+import 'dart:convert';
 
-part 'tarefas_model.g.dart';
+class TarefasModel {
+  final String title;
+  final bool check;
+  final bool important;
+  final bool urgent;
 
-class TarefasModel = TarefasModelBase with _$TarefasModel;
+  TarefasModel(
+      {required this.title,
+      required this.check,
+      required this.important,
+      required this.urgent});
 
-abstract class TarefasModelBase with Store {
-  TarefasModelBase(
-      {required this.title, this.check, this.important, this.urgent});
+  Map<String, dynamic> toMap() {
+    return <String, dynamic>{
+      'title': title,
+      'check': check,
+      'important': important,
+      'urgent': urgent,
+    };
+  }
 
-  @observable
-  String title;
+  factory TarefasModel.fromMap(Map<String, dynamic> map) {
+    return TarefasModel(
+      title: map['title'] as String,
+      check: map['check'] as bool,
+      important: map['important'] as bool,
+      urgent: map['urgent'] as bool,
+    );
+  }
 
-  @observable
-  bool? check;
+  String toJson() => json.encode(toMap());
 
-  @observable
-  bool? important;
-
-  @observable
-  bool? urgent;
+  factory TarefasModel.fromJson(String source) =>
+      TarefasModel.fromMap(json.decode(source) as Map<String, dynamic>);
 }
